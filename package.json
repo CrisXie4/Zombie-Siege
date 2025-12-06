@@ -1,0 +1,22 @@
+{
+  "name": "zombie-siege",
+  "version": "1.0.0",
+  "description": "僵尸围城 - 一个俯视角生存游戏",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "game",
+    "zombie",
+    "survival",
+    "html5",
+    "canvas"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

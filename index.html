@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>僵尸围城</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 启动画面 -->
+    <div id="splash-screen" class="screen active">
+        <div class="splash-content">
+            <h1 class="game-title">僵尸围城</h1>
+            <div class="zombie-icon">🧟</div>
+            <p class="tagline">在末日中生存</p>
+            <div class="menu-buttons">
+                <button id="btn-new-game" class="menu-btn">新游戏</button>
+                <button id="btn-continue" class="menu-btn" disabled>继续游戏</button>
+                <button id="btn-settings" class="menu-btn">设置</button>
+            </div>
+            <p class="version">v1.1.0</p>
+        </div>
+    </div>
+
+    <!-- 设置界面 -->
+    <div id="settings-screen" class="screen">
+        <div class="settings-content">
+            <h2>设置</h2>
+            <div class="setting-item">
+                <label>音效</label>
+                <input type="range" id="sound-volume" min="0" max="100" value="50">
+            </div>
+            <div class="setting-item">
+                <label>音乐</label>
+                <input type="range" id="music-volume" min="0" max="100" value="50">
+            </div>
+            <div class="setting-item">
+                <label>虚拟按键大小</label>
+                <select id="control-size">
+                    <option value="small">小</option>
+                    <option value="medium" selected>中</option>
+                    <option value="large">大</option>
+                </select>
+            </div>
+            <button id="btn-back-settings" class="menu-btn">返回</button>
+        </div>
+    </div>
+
+    <!-- 游戏主界面 -->
+    <div id="game-screen" class="screen">
+        <!-- 游戏画布 -->
+        <canvas id="game-canvas"></canvas>
+        
+        <!-- 游戏HUD -->
+        <div id="game-hud">
+            <div class="hud-top">
+                <div class="hud-item">
+                    <span class="hud-icon">❤️</span>
+                    <div class="hud-bar">
+                        <div id="health-bar" class="bar-fill health"></div>
+                    </div>
+                    <span id="health-text">100</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">🍖</span>
+                    <div class="hud-bar">
+                        <div id="hunger-bar" class="bar-fill hunger"></div>
+                    </div>
+                    <span id="hunger-text">100</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">💰</span>
+                    <span id="money-text">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-icon">🌊</span>
+                    <span id="wave-text">第 1 波</span>
+                </div>
+            </div>
+            
+            <div class="hud-right">
+                <button id="btn-pause" class="hud-btn">⏸️</button>
+                <button id="btn-shop" class="hud-btn">🏪</button>
+                <button id="btn-inventory" class="hud-btn">🎒</button>
+                <button id="btn-house" class="hud-btn">🏠</button>
+            </div>
+        </div>
+
+        <!-- 虚拟控制器 -->
+        <div id="virtual-controls">
+            <div id="joystick-container" class="control-area left">
+                <div id="joystick-base">
+                    <div id="joystick-stick"></div>
+                </div>
+            </div>
+            <div class="control-area right">
+                <button id="btn-attack" class="action-btn attack">⚔️</button>
+                <button id="btn-use-item" class="action-btn use">🧪</button>
+                <button id="btn-lock-doors" class="action-btn lock">🔒</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商店界面 -->
+    <div id="shop-screen" class="screen overlay">
+        <div class="shop-content">
+            <h2>商店 <span id="shop-money">💰 0</span></h2>
+            <div class="shop-tabs">
+                <button class="shop-tab active" data-tab="weapons">武器</button>
+                <button class="shop-tab" data-tab="food">食物</button>
+                <button class="shop-tab" data-tab="medicine">药品</button>
+                <button class="shop-tab" data-tab="ammo">弹药</button>
+                <button class="shop-tab" data-tab="building">建筑</button>
+            </div>
+            <div id="shop-items" class="shop-items">
+                <!-- 商品将通过JS动态生成 -->
+            </div>
+            <button id="btn-close-shop" class="menu-btn">关闭</button>
+        </div>
+    </div>
+
+    <!-- 背包界面 -->
+    <div id="inventory-screen" class="screen overlay">
+        <div class="inventory-content">
+            <h2>背包</h2>
+            <div class="inventory-info">
+                <div class="equipped-weapon">
+                    <h3>当前武器</h3>
+                    <div id="current-weapon">
+                        <span class="weapon-icon">🔪</span>
+                        <span class="weapon-name">小刀</span>
+                        <span class="weapon-ammo"></span>
+                    </div>
+                </div>
+            </div>
+            <div id="inventory-items" class="inventory-grid">
+                <!-- 物品将通过JS动态生成 -->
+            </div>
+            <button id="btn-close-inventory" class="menu-btn">关闭</button>
+        </div>
+    </div>
+
+    <!-- 家园管理界面 -->
+    <div id="house-screen" class="screen overlay">
+        <div class="house-content">
+            <h2>🏠 家园管理</h2>
+            
+            <!-- 家园信息 -->
+            <div class="house-info">
+                <div class="house-level">
+                    <span id="home-name">简陋小屋</span>
+                    <span> - 等级: </span>
+                    <span id="house-level-text">1</span>
+                </div>
+                <div class="house-storage">
+                    <span>存储空间: </span>
+                    <span id="storage-capacity">0/10</span>
+                </div>
+                <div class="house-upgrade">
+                    <button id="btn-upgrade-house" class="menu-btn small">升级家园</button>
+                </div>
+            </div>
+            
+            <!-- 存储系统 -->
+            <div class="storage-section">
+                <h3>📦 存储箱</h3>
+                <p class="storage-hint">提示：靠近家园中的存储箱按 E 键可以快速打开</p>
+                <div class="storage-tabs">
+                    <button class="storage-tab active" data-tab="stored">已存储</button>
+                    <button class="storage-tab" data-tab="store">存入物品</button>
+                </div>
+                <div id="storage-items" class="storage-grid">
+                    <!-- 存储物品将通过JS动态生成 -->
+                </div>
+            </div>
+            
+            <!-- 家园门管理 -->
+            <div class="doors-section">
+                <h3>🚪 家园门管理</h3>
+                <div class="doors-grid">
+                    <div class="door-item" data-direction="home">
+                        <span class="door-name">家园门</span>
+                        <div class="door-health">
+                            <div class="door-health-bar" id="door-health-home"></div>
+                        </div>
+                        <span class="door-status" id="door-status-home">已锁定</span>
+                        <div class="door-actions">
+                            <button class="small-btn btn-lock-door" data-direction="home">🔒</button>
+                            <button class="small-btn btn-repair-door" data-direction="home">🔧</button>
+                            <button class="small-btn btn-upgrade-door" data-direction="home">⬆️</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="door-bulk-actions">
+                    <button id="btn-lock-all" class="menu-btn small">🔒 锁定家园门</button>
+                </div>
+                <p class="door-hint">💡 提示：锁定门可以阻止僵尸进入家园，但僵尸会攻击门直到破坏它</p>
+            </div>
+            
+            <button id="btn-close-house" class="menu-btn">关闭</button>
+        </div>
+    </div>
+
+    <!-- 暂停界面 -->
+    <div id="pause-screen" class="screen overlay">
+        <div class="pause-content">
+            <h2>游戏暂停</h2>
+            <button id="btn-resume" class="menu-btn">继续游戏</button>
+            <button id="btn-save" class="menu-btn">保存游戏</button>
+            <button id="btn-controls-settings" class="menu-btn">控制设置</button>
+            <button id="btn-quit" class="menu-btn">返回主菜单</button>
+            <!-- 隐藏的开发者模式触发区域：连续点击版本号5次 -->
+            <p class="version-pause" id="dev-trigger">v1.1.0</p>
+        </div>
+    </div>
+
+    <!-- 控制设置界面 -->
+    <div id="controls-settings-screen" class="screen overlay">
+        <div class="controls-settings-content">
+            <h2>🎮 控制设置</h2>
+            
+            <div class="controls-section">
+                <h3>虚拟按键位置</h3>
+                <p class="controls-hint">拖动按钮到你喜欢的位置</p>
+                
+                <div class="position-presets">
+                    <button class="preset-btn" data-preset="default">默认位置</button>
+                    <button class="preset-btn" data-preset="compact">紧凑布局</button>
+                    <button class="preset-btn" data-preset="spread">分散布局</button>
+                </div>
+                
+                <div class="position-controls">
+                    <div class="position-item">
+                        <span>摇杆位置</span>
+                        <div class="position-inputs">
+                            <label>X: <input type="range" id="joystick-x" min="0" max="100" value="10"></label>
+                            <label>Y: <input type="range" id="joystick-y" min="0" max="100" value="70"></label>
+                        </div>
+                    </div>
+                    <div class="position-item">
+                        <span>攻击按钮</span>
+                        <div class="position-inputs">
+                            <label>X: <input type="range" id="attack-x" min="0" max="100" value="85"></label>
+                            <label>Y: <input type="range" id="attack-y" min="0" max="100" value="60"></label>
+                        </div>
+                    </div>
+                    <div class="position-item">
+                        <span>使用物品按钮</span>
+                        <div class="position-inputs">
+                            <label>X: <input type="range" id="use-x" min="0" max="100" value="85"></label>
+                            <label>Y: <input type="range" id="use-y" min="0" max="100" value="75"></label>
+                        </div>
+                    </div>
+                    <div class="position-item">
+                        <span>锁门按钮</span>
+                        <div class="position-inputs">
+                            <label>X: <input type="range" id="lock-x" min="0" max="100" value="85"></label>
+                            <label>Y: <input type="range" id="lock-y" min="0" max="100" value="90"></label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="size-control">
+                    <span>按钮大小</span>
+                    <input type="range" id="button-size" min="50" max="150" value="100">
+                    <span id="size-value">100%</span>
+                </div>
+                
+                <div class="opacity-control">
+                    <span>按钮透明度</span>
+                    <input type="range" id="button-opacity" min="30" max="100" value="70">
+                    <span id="opacity-value">70%</span>
+                </div>
+            </div>
+            
+            <div class="controls-buttons">
+                <button id="btn-save-controls" class="menu-btn">保存设置</button>
+                <button id="btn-reset-controls" class="menu-btn">重置默认</button>
+                <button id="btn-close-controls" class="menu-btn">返回</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 开发者密码输入界面 -->
+    <div id="dev-password-screen" class="screen overlay">
+        <div class="dev-password-content">
+            <h2>🔐 开发者模式</h2>
+            <p>请输入开发者密码</p>
+            <input type="password" id="dev-password-input" class="dev-input" placeholder="输入密码..." maxlength="10">
+            <div class="dev-password-buttons">
+                <button id="btn-dev-confirm" class="menu-btn">确认</button>
+                <button id="btn-dev-cancel" class="menu-btn">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 开发者控制台界面 -->
+    <div id="dev-console-screen" class="screen overlay">
+        <div class="dev-console-content">
+            <h2>🛠️ 开发者控制台</h2>
+            <div class="dev-section">
+                <h3>💰 资源管理</h3>
+                <div class="dev-buttons">
+                    <button class="dev-btn" data-action="addMoney">+1000 金币</button>
+                    <button class="dev-btn" data-action="addHealth">满血</button>
+                    <button class="dev-btn" data-action="addHunger">满饱食度</button>
+                    <button class="dev-btn" data-action="maxAll">全部满</button>
+                </div>
+            </div>
+            <div class="dev-section">
+                <h3>🎮 游戏控制</h3>
+                <div class="dev-buttons">
+                    <button class="dev-btn" data-action="killAllZombies">清除所有僵尸</button>
+                    <button class="dev-btn" data-action="nextWave">跳到下一波</button>
+                    <button class="dev-btn" data-action="godMode">无敌模式</button>
+                    <button class="dev-btn" data-action="speedBoost">速度提升</button>
+                </div>
+            </div>
+            <div class="dev-section">
+                <h3>🏠 家园管理</h3>
+                <div class="dev-buttons">
+                    <button class="dev-btn" data-action="upgradeHome">升级家园</button>
+                    <button class="dev-btn" data-action="repairWalls">修复围墙</button>
+                    <button class="dev-btn" data-action="repairAllDoors">修复所有门</button>
+                    <button class="dev-btn" data-action="upgradeAllDoors">升级所有门</button>
+                </div>
+            </div>
+            <div class="dev-section">
+                <h3>🔫 武器装备</h3>
+                <div class="dev-buttons">
+                    <button class="dev-btn" data-action="giveAllWeapons">获得所有武器</button>
+                    <button class="dev-btn" data-action="giveAmmo">+100 所有弹药</button>
+                    <button class="dev-btn" data-action="giveItems">获得补给品</button>
+                </div>
+            </div>
+            <div class="dev-section">
+                <h3>📊 调试信息</h3>
+                <div class="dev-info">
+                    <p>玩家位置: <span id="dev-player-pos">-</span></p>
+                    <p>僵尸数量: <span id="dev-zombie-count">-</span></p>
+                    <p>当前波次: <span id="dev-wave">-</span></p>
+                    <p>游戏时间: <span id="dev-playtime">-</span></p>
+                </div>
+                <button class="dev-btn" data-action="toggleDebug">切换调试显示</button>
+            </div>
+            <button id="btn-close-dev" class="menu-btn">关闭控制台</button>
+        </div>
+    </div>
+
+    <!-- 游戏结束界面 -->
+    <div id="gameover-screen" class="screen overlay">
+        <div class="gameover-content">
+            <h2>游戏结束</h2>
+            <div class="stats">
+                <p>存活波数: <span id="final-wave">0</span></p>
+                <p>击杀僵尸: <span id="final-kills">0</span></p>
+                <p>获得金币: <span id="final-money">0</span></p>
+            </div>
+            <button id="btn-restart" class="menu-btn">重新开始</button>
+            <button id="btn-main-menu" class="menu-btn">返回主菜单</button>
+        </div>
+    </div>
+
+    <!-- 加载脚本 -->
+    <script src="js/utils.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/items.js"></script>
+    <script src="js/door.js"></script>
+    <script src="js/house.js"></script>
+    <script src="js/homebase.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/zombie.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/controls.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
