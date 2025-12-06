@@ -71,6 +71,35 @@ const Items = {
             subType: 'upgrade',
             price: 500,
             description: '升级房屋等级，增加存储空间'
+        },
+        revive_token: {
+            id: 'revive_token',
+            name: '复活币',
+            icon: '💫',
+            type: 'building',
+            subType: 'revive',
+            price: 200,
+            description: '死亡时可使用复活币在家园复活，保留所有物品和进度'
+        },
+        revive_pack_3: {
+            id: 'revive_pack_3',
+            name: '复活币x3',
+            icon: '💫',
+            type: 'building',
+            subType: 'revive',
+            quantity: 3,
+            price: 500,
+            description: '3个复活币，比单买更划算'
+        },
+        revive_pack_5: {
+            id: 'revive_pack_5',
+            name: '复活币x5',
+            icon: '💫',
+            type: 'building',
+            subType: 'revive',
+            quantity: 5,
+            price: 750,
+            description: '5个复活币，最划算的选择'
         }
     },
 

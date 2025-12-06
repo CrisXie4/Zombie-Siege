@@ -1467,3 +1467,116 @@ html, body {
         padding: 6px 8px;
     }
 }
+
+/* 复活界面样式 */
+.revive-content {
+    background: var(--bg-dark);
+    padding: 30px;
+    border-radius: 15px;
+    border: 2px solid #ffd700;
+    text-align: center;
+    min-width: 300px;
+    max-width: 400px;
+    animation: slideUp 0.3s ease;
+}
+
+.revive-content h2 {
+    color: var(--accent-color);
+    margin-bottom: 15px;
+    font-size: 2rem;
+}
+
+.revive-content p {
+    color: #aaa;
+    margin-bottom: 20px;
+    font-size: 1.1rem;
+}
+
+.revive-content #revive-tokens-count {
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+.revive-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#btn-use-revive {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    background: linear-gradient(180deg, #ffd700 0%, #b8860b 100%);
+    border: 2px solid #ffd700;
+    color: #000;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+#btn-use-revive:hover {
+    background: linear-gradient(180deg, #ffec8b 0%, #ffd700 100%);
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+#btn-use-revive:active {
+    transform: scale(0.95);
+}
+
+#btn-decline-revive {
+    padding: 12px 25px;
+    font-size: 1rem;
+    background: linear-gradient(180deg, var(--secondary-color) 0%, var(--bg-dark) 100%);
+    border: 2px solid var(--primary-color);
+    color: var(--text-color);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#btn-decline-revive:hover {
+    background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+}
+
+#btn-decline-revive:active {
+    transform: scale(0.95);
+}
+
+/* 复活动画效果 */
+@keyframes reviveGlow {
+    0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+}
+
+.revive-content.animating {
+    animation: reviveGlow 0.5s ease-in-out 3;
+}
+
+/* 响应式 - 复活界面 */
+@media (max-width: 480px) {
+    .revive-content {
+        padding: 20px;
+        min-width: 250px;
+    }
+    
+    .revive-content h2 {
+        font-size: 1.5rem;
+    }
+    
+    .revive-content p {
+        font-size: 1rem;
+    }
+    
+    #btn-use-revive {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+    
+    #btn-decline-revive {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+}

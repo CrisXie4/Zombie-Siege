@@ -100,6 +100,10 @@ const UI = {
         document.getElementById('btn-restart').addEventListener('click', () => this.startNewGame());
         document.getElementById('btn-main-menu').addEventListener('click', () => this.quitToMenu());
         
+        // 复活对话框
+        document.getElementById('btn-use-revive').addEventListener('click', () => this.useRevive());
+        document.getElementById('btn-decline-revive').addEventListener('click', () => this.declineRevive());
+        
         // 隐藏的开发者模式触发（连续点击版本号5次）
         const devTrigger = document.getElementById('dev-trigger');
         if (devTrigger) {
@@ -396,14 +400,20 @@ const UI = {
         // 扣钱
         this.game.player.spendMoney(item.price);
         
+        // 处理复活币
+        if (item.subType === 'revive') {
+            const quantity = item.quantity || 1;
+            this.game.player.addReviveToken(quantity);
+            Utils.showToast(`购买了 ${item.name}，当前复活币: ${this.game.player.getReviveTokens()}`, 'success');
+        }
         // 添加物品
-        if (category === 'ammo') {
+        else if (category === 'ammo') {
             this.game.player.addItem(item.id, item.quantity);
+            Utils.showToast(`购买了 ${item.name}`, 'success');
         } else {
             this.game.player.addItem(item.id, 1);
+            Utils.showToast(`购买了 ${item.name}`, 'success');
         }
-        
-        Utils.showToast(`购买了 ${item.name}`, 'success');
         
         // 刷新显示
         this.updateShopMoney();
@@ -1370,6 +1380,29 @@ const UI = {
             this.controlsSettings = saved;
         }
         this.applyControlsToDOM(this.controlsSettings);
+    },
+
+    // ==================== 复活系统 ====================
+    
+    // 显示复活对话框
+    showReviveDialog(tokenCount) {
+        document.getElementById('revive-tokens-count').textContent = tokenCount;
+        this.showScreen('revive-screen');
+    },
+    
+    // 使用复活币
+    useRevive() {
+        this.hideScreen('revive-screen');
+        if (this.game.revivePlayer()) {
+            // 复活成功，自动保存游戏
+            this.saveGame();
+        }
+    },
+    
+    // 拒绝复活
+    declineRevive() {
+        this.hideScreen('revive-screen');
+        this.game.declineRevive();
     }
 };
 

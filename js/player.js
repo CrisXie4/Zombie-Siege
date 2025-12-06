@@ -19,6 +19,7 @@ class Player {
         this.hunger = 100;
         this.maxHunger = 100;
         this.money = 100;
+        this.reviveTokens = 0; // 复活币数量
         
         // 移动
         this.speed = 3;
@@ -492,6 +493,25 @@ class Player {
         };
     }
 
+    // 添加复活币
+    addReviveToken(amount = 1) {
+        this.reviveTokens += amount;
+    }
+
+    // 使用复活币
+    useReviveToken() {
+        if (this.reviveTokens > 0) {
+            this.reviveTokens--;
+            return true;
+        }
+        return false;
+    }
+
+    // 获取复活币数量
+    getReviveTokens() {
+        return this.reviveTokens;
+    }
+
     // 序列化（用于保存）
     serialize() {
         return {
@@ -502,6 +522,7 @@ class Player {
             hunger: this.hunger,
             maxHunger: this.maxHunger,
             money: this.money,
+            reviveTokens: this.reviveTokens,
             speed: this.baseSpeed,
             damage: this.baseDamage,
             defense: this.baseDefense,
@@ -523,6 +544,7 @@ class Player {
         this.hunger = data.hunger || this.hunger;
         this.maxHunger = data.maxHunger || this.maxHunger;
         this.money = data.money || this.money;
+        this.reviveTokens = data.reviveTokens || 0;
         this.baseSpeed = data.speed || this.baseSpeed;
         this.speed = this.baseSpeed;
         this.baseDamage = data.damage || this.baseDamage;

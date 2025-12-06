@@ -1007,6 +1007,20 @@ class Game {
 
     // 游戏结束
     gameOver() {
+        // 检查是否有复活币
+        if (this.player.getReviveTokens() > 0) {
+            // 暂停游戏，显示复活确认对话框
+            this.isPaused = true;
+            UI.showReviveDialog(this.player.getReviveTokens());
+            return;
+        }
+        
+        // 没有复活币，真正的游戏结束
+        this.finalGameOver();
+    }
+
+    // 最终游戏结束（无法复活）
+    finalGameOver() {
         this.isGameOver = true;
         this.isRunning = false;
         
@@ -1023,6 +1037,47 @@ class Game {
         document.getElementById('final-money').textContent = this.totalMoney;
         
         UI.showScreen('gameover-screen');
+    }
+
+    // 使用复活币复活
+    revivePlayer() {
+        if (!this.player.useReviveToken()) {
+            return false;
+        }
+        
+        // 复活玩家
+        this.player.health = this.player.maxHealth;
+        this.player.hunger = Math.max(50, this.player.hunger); // 至少50饱食度
+        
+        // 传送到家园重生点
+        if (this.homeBase) {
+            const spawnPoint = this.homeBase.getSpawnPoint();
+            this.player.x = spawnPoint.x;
+            this.player.y = spawnPoint.y;
+        }
+        
+        // 清除附近的僵尸（给玩家一些喘息空间）
+        const safeRadius = 200;
+        this.zombies = this.zombies.filter(zombie => {
+            const dist = Utils.distance(zombie.x, zombie.y, this.player.x, this.player.y);
+            return dist > safeRadius;
+        });
+        
+        // 给玩家短暂无敌时间
+        this.player.invincible = true;
+        this.player.invincibleTimer = 3000; // 3秒无敌
+        
+        // 继续游戏
+        this.isPaused = false;
+        
+        Utils.showToast('💫 你已复活！', 'success');
+        
+        return true;
+    }
+
+    // 拒绝复活，直接结束游戏
+    declineRevive() {
+        this.finalGameOver();
     }
 
     // 获取游戏状态（用于保存）
